@@ -2,11 +2,13 @@ import { createApp } from './app.js';
 import { config } from './config/index.js';
 import { closePool } from './db/index.js';
 import { stopAllJobs } from './utils/cron.js';
+import { initializeScheduledJobs } from './services/schedulerService.js';
 
 const app = createApp();
 
 const server = app.listen(config.port, () => {
   console.log(`Server running on port ${config.port} in ${config.nodeEnv} mode`);
+  initializeScheduledJobs();
 });
 
 function gracefulShutdown(signal: string): void {
