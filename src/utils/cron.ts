@@ -4,6 +4,7 @@ export interface ScheduledJob {
   name: string;
   task: cron.ScheduledTask;
   expression: string;
+  timezone?: string;
 }
 
 const scheduledJobs: Map<string, ScheduledJob> = new Map();
@@ -11,12 +12,18 @@ const scheduledJobs: Map<string, ScheduledJob> = new Map();
 export function scheduleJob(
   name: string,
   cronExpression: string,
-  callback: () => void | Promise<void>
+  callback: () => void | Promise<void>,
+  timezone?: string
 ): ScheduledJob {
   if (scheduledJobs.has(name)) {
     console.warn(`Job "${name}" already exists. Stopping existing job.`);
     stopJob(name);
   }
+
+  const options: cron.ScheduleOptions = {
+    scheduled: true,
+    timezone: timezone ?? 'UTC',
+  };
 
   const task = cron.schedule(cronExpression, async () => {
     console.log(`Running scheduled job: ${name}`);
@@ -26,12 +33,12 @@ export function scheduleJob(
     } catch (error) {
       console.error(`Job "${name}" failed:`, error);
     }
-  });
+  }, options);
 
-  const job: ScheduledJob = { name, task, expression: cronExpression };
+  const job: ScheduledJob = { name, task, expression: cronExpression, timezone: timezone ?? 'UTC' };
   scheduledJobs.set(name, job);
 
-  console.log(`Scheduled job "${name}" with expression: ${cronExpression}`);
+  console.log(`Scheduled job "${name}" with expression: ${cronExpression} (${timezone ?? 'UTC'})`);
   return job;
 }
 
@@ -39,10 +46,11 @@ export function scheduleDailyJob(
   name: string,
   hour: number,
   minute: number,
-  callback: () => void | Promise<void>
+  callback: () => void | Promise<void>,
+  timezone: string = 'UTC'
 ): ScheduledJob {
   const cronExpression = `${minute} ${hour} * * *`;
-  return scheduleJob(name, cronExpression, callback);
+  return scheduleJob(name, cronExpression, callback, timezone);
 }
 
 export function stopJob(name: string): boolean {

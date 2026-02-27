@@ -61,3 +61,27 @@ export interface PaginatedResponse<T> {
   pageSize: number;
   totalPages: number;
 }
+
+export type CrawlStatus = 'running' | 'completed' | 'failed';
+
+export interface Crawl {
+  id: string;
+  status: CrawlStatus;
+  source: ArticleSource | 'all';
+  articlesCount: number;
+  startedAt: Date;
+  completedAt?: Date;
+  errorMessage?: string;
+  createdAt: Date;
+}
+
+export interface CrawlRow {
+  id: string;
+  status: CrawlStatus;
+  source: string;
+  articles_count: number;
+  started_at: Date;
+  completed_at: Date | null;
+  error_message: string | null;
+  created_at: Date;
+}
