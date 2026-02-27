@@ -61,3 +61,28 @@ export interface PaginatedResponse<T> {
   pageSize: number;
   totalPages: number;
 }
+
+export interface ArticleFilter {
+  source?: ArticleSource;
+  dateFrom?: string;
+  dateTo?: string;
+  search?: string;
+}
+
+export interface ArticleListQuery extends ArticleFilter {
+  page?: number;
+  pageSize?: number;
+  sortBy?: 'publishedAt' | 'crawledAt';
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface ArticleStats {
+  source: ArticleSource;
+  count: number;
+  latestPublishedAt: Date | null;
+}
+
+export const ARTICLE_SOURCES: ArticleSource[] = ['reddit', 'hackernews', 'medium', 'provider_blog'];
+
+export const DEFAULT_PAGE_SIZE = 20;
+export const MAX_PAGE_SIZE = 100;
