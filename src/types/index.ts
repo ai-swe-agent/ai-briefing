@@ -61,3 +61,13 @@ export interface PaginatedResponse<T> {
   pageSize: number;
   totalPages: number;
 }
+
+export interface ArticleQueryParams {
+  search?: string;
+  source?: ArticleSource | ArticleSource[];
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  pageSize?: number;
+}
+
