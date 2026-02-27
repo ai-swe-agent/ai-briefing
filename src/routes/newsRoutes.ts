@@ -2,7 +2,8 @@ import { Router, type Request, type Response, type NextFunction } from 'express'
 import type { ApiResponse, PaginatedResponse, NewsArticle, CrawlResult, CrawlLog } from '../types/index.js';
 import { getArticles, getArticleById, getLatestCrawlLogs, getEnabledSources } from '../repositories/newsRepository.js';
 import { crawlAllSources, crawlSingleSource } from '../services/newsCrawler.js';
-import { AppError, ValidationError, NotFoundError } from '../middleware/errorHandler.js';
+import { ValidationError, NotFoundError } from '../middleware/errorHandler.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -40,7 +41,9 @@ router.get('/articles', asyncHandler(async (req: Request, res: Response) => {
 }));
 
 router.get('/articles/:id', asyncHandler(async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id, 10);
+  const idParam = req.params.id;
+  const idStr = Array.isArray(idParam) ? idParam[0] : idParam;
+  const id = parseInt(idStr, 10);
 
   if (isNaN(id)) {
     throw new ValidationError('Invalid article ID');
@@ -89,7 +92,7 @@ router.get('/crawl/logs', asyncHandler(async (req: Request, res: Response) => {
   res.json(response);
 }));
 
-router.post('/crawl/trigger', asyncHandler(async (req: Request, res: Response) => {
+router.post('/crawl/trigger', authenticate, asyncHandler(async (req: Request, res: Response) => {
   const sourceName = req.body?.source as string | undefined;
 
   let results: CrawlResult[] | CrawlResult | null;

@@ -62,7 +62,6 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
-
 export type NewsSourceType = 'rss' | 'html';
 
 export interface NewsSource {

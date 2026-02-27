@@ -12,10 +12,14 @@ import {
   generateContentHash,
 } from '../repositories/newsRepository.js';
 
+const STALE_ENTRY_THRESHOLD_MS = 60 * 60 * 1000;
+
 class DomainRateLimiter {
   private lastRequestTime: Map<string, number> = new Map();
 
   async waitForDomain(domain: string, delayMs: number): Promise<void> {
+    this.cleanupStaleEntries();
+    
     const now = Date.now();
     const lastRequest = this.lastRequestTime.get(domain) ?? 0;
     const elapsed = now - lastRequest;
@@ -26,6 +30,15 @@ class DomainRateLimiter {
     }
 
     this.lastRequestTime.set(domain, Date.now());
+  }
+
+  private cleanupStaleEntries(): void {
+    const now = Date.now();
+    for (const [domain, timestamp] of this.lastRequestTime.entries()) {
+      if (now - timestamp > STALE_ENTRY_THRESHOLD_MS) {
+        this.lastRequestTime.delete(domain);
+      }
+    }
   }
 
   private delay(ms: number): Promise<void> {
@@ -67,27 +80,33 @@ interface ParsedArticle {
 }
 
 async function parseRssFeed(feedUrl: string): Promise<ParsedArticle[]> {
-  const feed = await extract(feedUrl, {
-    getExtraEntryFields: (feedEntry: Record<string, unknown>) => {
-      return {
-        author: feedEntry['dc:creator'] ?? feedEntry['author'] ?? null,
-        content: feedEntry['content:encoded'] ?? feedEntry['content'] ?? null,
-      };
-    },
-  });
+  try {
+    const feed = await extract(feedUrl, {
+      getExtraEntryFields: (feedEntry) => {
+        const entry = feedEntry as Record<string, unknown>;
+        return {
+          author: entry['dc:creator'] ?? entry['author'] ?? null,
+          content: entry['content:encoded'] ?? entry['content'] ?? null,
+        };
+      },
+    });
 
-  if (!feed.entries) {
+    if (!feed.entries) {
+      return [];
+    }
+
+    return feed.entries.slice(0, CRAWL_CONFIG.maxArticlesPerSource).map(entry => ({
+      title: entry.title ?? 'Untitled',
+      url: entry.link ?? '',
+      content: (entry as { content?: string }).content ?? null,
+      summary: entry.description?.substring(0, 1000) ?? null,
+      author: (entry as { author?: string }).author ?? null,
+      publishedAt: entry.published ? new Date(entry.published) : null,
+    }));
+  } catch (error) {
+    console.error(`Failed to parse RSS feed ${feedUrl}:`, error instanceof Error ? error.message : error);
     return [];
   }
-
-  return feed.entries.slice(0, CRAWL_CONFIG.maxArticlesPerSource).map(entry => ({
-    title: entry.title ?? 'Untitled',
-    url: entry.link ?? '',
-    content: (entry as { content?: string }).content ?? null,
-    summary: entry.description?.substring(0, 1000) ?? null,
-    author: (entry as { author?: string }).author ?? null,
-    publishedAt: entry.published ? new Date(entry.published) : null,
-  }));
 }
 
 async function parseHtmlPage(url: string, selectors: HtmlSelectors): Promise<ParsedArticle[]> {
