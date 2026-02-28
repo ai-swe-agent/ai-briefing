@@ -61,3 +61,25 @@ export interface PaginatedResponse<T> {
   pageSize: number;
   totalPages: number;
 }
+
+export interface ArticleFilters {
+  category?: ArticleSource;
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface ArticleRow {
+  id: string;
+  title: string;
+  url: string;
+  source: ArticleSource;
+  content: string;
+  summary: string | null;
+  published_at: Date;
+  crawled_at: Date;
+  created_at: Date;
+  updated_at: Date;
+}

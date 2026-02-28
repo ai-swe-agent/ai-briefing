@@ -2,6 +2,7 @@ import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+import articlesRouter from './routes/articles.js';
 import type { ApiResponse } from './types/index.js';
 
 export function createApp(): Express {
@@ -22,6 +23,8 @@ export function createApp(): Express {
     };
     res.json(response);
   });
+
+  app.use('/articles', articlesRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
