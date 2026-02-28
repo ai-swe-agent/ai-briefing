@@ -61,3 +61,42 @@ export interface PaginatedResponse<T> {
   pageSize: number;
   totalPages: number;
 }
+
+/**
+ * Database row interfaces - match db/schema.sql exactly
+ */
+
+export interface UserRow {
+  id: string;
+  email: string;
+  password_hash: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface NewsArticleRow {
+  id: string;
+  title: string;
+  content: string;
+  source_url: string;
+  published_at: Date | null;
+  category: string | null;
+  created_at: Date;
+}
+
+export interface UserPreferencesRow {
+  user_id: string;
+  categories: string[];
+  keywords: string[];
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface CrawlRow {
+  id: string;
+  started_at: Date;
+  completed_at: Date | null;
+  articles_found: number;
+  status: string;
+  error_message: string | null;
+}
