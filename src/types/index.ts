@@ -15,6 +15,7 @@ export interface Article {
   title: string;
   url: string;
   source: ArticleSource;
+  category?: string;
   content: string;
   summary?: string;
   publishedAt: Date;
@@ -60,4 +61,13 @@ export interface PaginatedResponse<T> {
   page: number;
   pageSize: number;
   totalPages: number;
+}
+
+export interface ArticleFilterParams {
+  page?: number;
+  pageSize?: number;
+  category?: string;
+  startDate?: string;
+  endDate?: string;
+  search?: string;
 }
