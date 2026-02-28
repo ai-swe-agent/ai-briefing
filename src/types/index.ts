@@ -5,29 +5,27 @@
 export interface User {
   id: string;
   email: string;
-  password: string;
+  passwordHash: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface Article {
+export interface NewsArticle {
   id: string;
   title: string;
-  url: string;
-  source: ArticleSource;
-  content: string;
-  summary?: string;
-  publishedAt: Date;
-  crawledAt: Date;
+  content: string | null;
+  sourceUrl: string;
+  publishedAt: Date | null;
+  category: string | null;
+  createdAt: Date;
 }
 
 export type ArticleSource = 'reddit' | 'hackernews' | 'medium' | 'provider_blog';
 
 export interface UserPreferences {
-  id: string;
   userId: string;
-  sources: ArticleSource[];
-  emailDigest: boolean;
+  categories: string[];
+  keywords: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -60,4 +58,11 @@ export interface PaginatedResponse<T> {
   page: number;
   pageSize: number;
   totalPages: number;
+}
+
+export interface Crawl {
+  id: string;
+  startedAt: Date;
+  completedAt: Date | null;
+  articlesFound: number;
 }
