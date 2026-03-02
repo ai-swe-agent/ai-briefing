@@ -19,7 +19,8 @@ router.get('/stats', async (_req: Request, res: Response, next: NextFunction): P
 
 router.get('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const article = await articlesService.getArticleById(req.params.id);
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const article = await articlesService.getArticleById(id);
     const response: ApiResponse<Article> = {
       success: true,
       data: article,
