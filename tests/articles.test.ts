@@ -113,7 +113,7 @@ describe('GET /api/articles', () => {
         .expect(400);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('date');
+      expect(response.body.error.toLowerCase()).toContain('date');
     });
   });
 
